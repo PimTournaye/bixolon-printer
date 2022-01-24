@@ -1,32 +1,28 @@
 const express = require('express');
+const Printer = require('./printer');
 const app = express();
 const port = 3503;
+const path = require('path');
 
-const print = require('./print.js');
+var bodyParser = require('body-parser')
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
 
-const DATE = Date.now().to;
+// parse application/json
+app.use(bodyParser.json())
 
-console.log(DATE);
+const printer = new Printer()
 
 app.get('/', (req, res) => {
-  res.send('Hello World! \n Printing!')
+res.sendFile(path.join(__dirname, '/index.html'));
   console.log('connected');
-  print.printZebra(`
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  `, 'BIXOLON_BK3_3')
+})
+
+app.post('/', (req, res) => {
+    console.log('posted');
+    console.log(req.body.text);
+    printer.printRaw(req.body.text)
 })
 
 app.listen(port, () => {
