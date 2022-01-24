@@ -3,15 +3,15 @@ const PRINTER_NAME = 'BIXOLON_BK3_3'
    
 
 // Will get to refactoring later once I know what I need
-class Printer {
+module.exports = class Printer {
     constructor(printerName){
-        this.PRINTER_NAME = printerName
+        this.name = printerName
     }
 
     printRaw(text){
         printer.printDirect({
             data:text, 
-            printer:this.PRINTER_NAME,
+            printer:this.name,
             type: "RAW",
             success:function(){	console.log("printed: "+text);},
             error:function(err){console.log(err);}
@@ -36,8 +36,3 @@ class Printer {
         });
     }
 }    
-
-
-
-const printer = new Printer()
-module.exports = {printer}
