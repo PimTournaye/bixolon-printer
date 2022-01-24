@@ -1,14 +1,24 @@
 {
   "name": "bixolon-printer",
   "version": "0.0.1",
-  "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@thiagoelg/node-printer": "^0.5.6"
-  }
+    "@thiagoelg/node-printer": "^0.5.6",
+    "express": "^4.17.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PimTournaye/bixolon-printer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PimTournaye/bixolon-printer/issues"
+  },
+  "homepage": "https://github.com/PimTournaye/bixolon-printer#readme",
+  "description": ""
 }

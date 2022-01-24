@@ -1,0 +1,6 @@
+PRINTER NOTES
+
+1. Max length of a line is 38 characters
+2. the \ character gets treated as newline or \n
+3. You can print loooooooong stuff
+4. Cutting is an issue
