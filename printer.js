@@ -9,7 +9,7 @@ module.exports = class Printer {
     }
 
     printRaw(text){
-        printer.printDirect({
+        nodeprinter.printDirect({
             data:text, 
             printer:this.name,
             type: "RAW",
