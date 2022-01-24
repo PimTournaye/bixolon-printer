@@ -5,3 +5,4 @@ PRINTER NOTES
 3. You can print loooooooong stuff
 4. Cutting is an (hardware) issue
 5. Blanks notes can be made. (maybe to start it up or inbetween messages?)
+6. Images can be printed if they are in JPEG format
