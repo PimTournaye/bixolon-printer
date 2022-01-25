@@ -6,3 +6,6 @@ PRINTER NOTES
 4. Cutting is an (hardware) issue
 5. Blanks notes can be made. (maybe to start it up or inbetween messages?)
 6. Images can be printed if they are in JPEG format
+
+
+To fix the presenter issue, take a look at: MSW 13 - auto eject mode on

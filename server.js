@@ -21,7 +21,6 @@ res.sendFile(path.join(__dirname, '/index.html'));
 
 app.post('/', (req, res) => {
     console.log('posted');
-    console.log(req.body.text);
     printer.printRaw(req.body.text)
 })
 

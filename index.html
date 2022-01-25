@@ -9,12 +9,10 @@
 </head>
 
 <body>
-    <input type="text" name="input" id="input">
+    <textarea type="text" name="input" id="input"></textarea>
     <input type="submit" value="send" id="submit">
 </body>
     <script>
-
-        console.log('loaded');
         async function postData(url = '', data = {}) {
             // Default options are marked with *
             const response = await fetch(url, {
@@ -35,7 +33,6 @@
         
         let btn = document.querySelector('#submit');
 
-        console.log(input, btn, document.getElementById('input'));
         document.getElementById('submit').addEventListener('click', () => {
             //event.preventDefault();
             console.log('pressed');
