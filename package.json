@@ -6,12 +6,14 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
+  "type": "module",
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@thiagoelg/node-printer": "^0.5.6",
     "body-parser": "^1.19.1",
-    "express": "^4.17.2"
+    "express": "^4.17.2",
+    "node-fetch": "^3.2.0"
   },
   "repository": {
     "type": "git",
@@ -21,5 +23,8 @@
     "url": "https://github.com/PimTournaye/bixolon-printer/issues"
   },
   "homepage": "https://github.com/PimTournaye/bixolon-printer#readme",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "@faker-js/faker": "^6.0.0-alpha.5"
+  }
 }

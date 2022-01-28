@@ -1,13 +1,5 @@
 const nodeprinter = require('@thiagoelg/node-printer')
 const PRINTER_NAME = 'BIXOLON_BK3_3'
-   
-String.prototype.toBytes = function (){
-    var arr = [];
-    for (var i = 0; i < this.length; i++) {
-    arr.push(this[i].charCodeAt(0))
-    }
-    return arr;
-    };
 
 
 const INITIAL_PRINTER = '\x1B\x40';
