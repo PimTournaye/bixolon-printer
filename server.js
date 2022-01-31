@@ -1,20 +1,20 @@
-const express = require('express');
-const Printer = require('./printer');
+import express from 'express';
+import Printer from './printer';
 const app = express();
 const port = 3503;
-const path = require('path');
+import { join } from 'path';
 
-var bodyParser = require('body-parser')
+import { urlencoded, json } from 'body-parser';
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(urlencoded({ extended: false }))
 
 // parse application/json
-app.use(bodyParser.json())
+app.use(json())
 
 const printer = new Printer()
 
 app.get('/', (req, res) => {
-res.sendFile(path.join(__dirname, '/index.html'));
+res.sendFile(join(__dirname, '/index.html'));
   console.log('connected');
   
 })
