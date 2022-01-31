@@ -42,7 +42,7 @@ export default class Fetcher {
 
 
     async getSome(amount){
-        const response = await fetch('https://www.jemelibere.be/wp-json/wp/v2/story?api_key=9$XA5DqD@tpI');
+        const response = await fetch(`https://www.jemelibere.be/wp-json/wp/v2/story?api_key=9$XA5DqD@tpI&per_page=${amount}`);
         const data = await response.json();
 
         return data;
