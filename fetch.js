@@ -21,8 +21,8 @@ export default class Fetcher {
         const message = data[0].content.rendered;
         
         const result = {
-            lastMessage = this.lastMessage,
-            hasNewMessage = this.hasNewMessage
+            lastMessage: this.lastMessage,
+            hasNewMessage: this.hasNewMessage
         }
 
         if (message != this.lastMessage) {
