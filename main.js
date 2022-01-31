@@ -29,6 +29,8 @@ printer.getPrinters().forEach(element => {
     } else console.log('skipping non-bixolon printer');
 });
 
+console.log(ticketPrinters);
+
 let tempPrinterArray = [];
 
 // Make Printer objects for each element in the array
@@ -59,8 +61,10 @@ setInterval( async () => {
         // Get a random printer from our array of available printers
         let currentPrinter = _.sample(ticketPrinters);
         //Get rid of HTML tags so we can cleanly print the message
-        let cleanMessage = formatter.stripHTML(message.lastMessage)
-        currentPrinter.printRaw(cleanMessage)
+        let strippedMessage = formatter.stripHTML(message.lastMessage)
+
+        let wrappedMessage = formatter.wrap(strippedMessage, 48)
+        currentPrinter.printRaw(wrappedMessage)
 
 
     } else {
