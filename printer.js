@@ -1,4 +1,4 @@
-const nodeprinter = require('@thiagoelg/node-printer')
+import { printDirect } from '@thiagoelg/node-printer';
 const PRINTER_NAME = 'BIXOLON_BK3_3'
 
 
@@ -9,7 +9,7 @@ const PAPER_CUTTING = '\x08\x56\x31';
 //const PAPER_EJECT = '\29\101\5';
 
 // Will get to refactoring later once I know what I need
-module.exports = class Printer {
+export default class Printer {
     constructor(printerName){
         this.name = printerName
     }
@@ -17,7 +17,7 @@ module.exports = class Printer {
     printRaw(text){
         let modifiedText = '\n \n' + text + "\n \n \n \n" 
         
-        nodeprinter.printDirect({
+        printDirect({
             data: Buffer.from(INITIAL_PRINTER) + Buffer.from(modifiedText) + Buffer.from(PAPER_CUTTING) + Buffer.from(PAPER_EJECT) , 
             printer:this.name,
             type: "RAW",
@@ -35,7 +35,7 @@ module.exports = class Printer {
     }
 
     printImage(image){
-        nodeprinter.printDirect({
+        printDirect({
             data:image, 
             printer:PRINTER_NAME,
             type: "JPEG",
@@ -45,7 +45,7 @@ module.exports = class Printer {
     }
 
     print(data){
-        nodeprinter.printDirect({
+        printDirect({
             data: Buffer.from(INITIAL_PRINTER) + Buffer.from(data) + Buffer.from(PAPER_CUTTING) + Buffer.from(PAPER_EJECT) , 
             printer:this.name,
             type: "RAW",
