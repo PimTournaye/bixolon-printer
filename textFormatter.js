@@ -7,4 +7,9 @@ export default class TextFormatter {
         let strippedString = text.replace(/(<([^>]+)>)/gi, "");
         return strippedString;
     }
+
+    wrap(text, lineWidth){
+        let message = text.replace(new RegExp(`(?![^\\n]{1,${lineWidth}}$)([^\\n]{1,${lineWidth}})\\s`, 'g'), '$1\n')
+        return message;
+    }
 }
