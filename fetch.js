@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 
 export default class Fetcher {
     constructor(name) {
-        this.API_KEY = '9$XA5DqD@tpI';
+        this.API_KEY = process.env.API_KEY;
         this.lastMessage = undefined;
         this.name = name;
         this.hasNewMessage = false;
