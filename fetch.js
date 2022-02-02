@@ -4,14 +4,15 @@ import fetch from 'node-fetch';
 export default class Fetcher {
     constructor(name) {
         this.API_KEY = process.env.API_KEY;
-        this.lastMessage = undefined;
+        this.lastMessage;
         this.name = name;
         this.hasNewMessage = false;
     }
 
     async getLatest() {
         //Get JSON from API
-        const response = await fetch(`https://www.jemelibere.be/wp-json/wp/v2/story?api_key=${this.API_KEY}`)
+        const response = await fetch('https://www.jemelibere.be/wp-json/wp/v2/story?api_key=9$XA5DqD@tpI');
+        //const response = await fetch(`https://www.jemelibere.be/wp-json/wp/v2/story?api_key=${this.API_KEY}`)
         const data = await response.json();
 
         //Set hasNewMessage bool to false by default before checking
