@@ -1,13 +1,13 @@
 import Fetcher from './fetch.js';
 import Printer from './printer.js';
 import TextFormatter from './textFormatter.js';
+import { Gpio } from 'onoff';
 
 import printer from '@thiagoelg/node-printer';
-import _ from 'lodash';
+import _, { debounce } from 'lodash';
 
 let fetcher = new Fetcher();
 let formatter = new TextFormatter();
-
 
 /////////////////
 // SETUP ////////
@@ -46,16 +46,18 @@ ticketPrinters = tempPrinterArray;
 const LOOP_TIMER = 3000
 
 
+// GPIO setup
+const buttonPin = 4;
+const button = new Gpio(buttonPin, 'in', 'both', {debounceTimeout: 10})
+
+
 ////////////////////
 // MAIN LOOP ///////
 ////////////////////
 
 setInterval( async () => {
-    
     let message = await fetcher.getLatest()
-
     if (message.hasNewMessage == true) {
-
         console.log('new message', message.lastMessage)
 
         // Get a random printer from our array of available printers
@@ -65,13 +67,18 @@ setInterval( async () => {
 
         let wrappedMessage = formatter.wrap(strippedMessage, 48)
         currentPrinter.printRaw(wrappedMessage)
-
-
     } else {
         console.log('no new message')
-        console.log(message);
+        //console.log(message);
     }
 }, LOOP_TIMER);
+
+// Watch for button press to call the wind function
+button.watch((err, value) =>{
+    if(err) throw err;
+    wind();
+    //button.unexport();
+})
 
 
 
@@ -84,5 +91,21 @@ setInterval( async () => {
 
 // Function for emulating tons of new messages coming in
 const wind = () => {
+    let amount = _.random(12, 50)
+    let messages = [];
+    
+    let someMessages = fetcher.getSome(amount);
+
+    someMessages.forEach(data => {
+        const message = data[0].content.rendered;
+        
+        //Get rid of HTML tags so we can cleanly print the message
+        let strippedMessage = formatter.stripHTML(message)
+        // Make sure no words get split when starting a new line
+        let wrappedMessage = formatter.wrap(strippedMessage, 48)
+
+        let currentPrinter = _.sample(ticketPrinters);
+    });
+
 
 }
