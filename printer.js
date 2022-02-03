@@ -8,7 +8,6 @@ const PAPER_CUTTING = '\x08\x56\x31';
 
 const IMAGE = '\x1C\x70\x01\x00'
 const FRENCH_CHAR = '\x1B\x52\x01'
-//const PAPER_EJECT = '\29\101\5';
 
 // Will get to refactoring later once I know what I need
 export default class Printer {
