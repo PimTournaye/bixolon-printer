@@ -43,12 +43,14 @@ ticketPrinters.forEach(element => {
 ticketPrinters = tempPrinterArray;
 
 // Important variables
-const LOOP_TIMER = 3000
+const LOOP_TIMER = 10000
 
 
 // GPIO setup
-const buttonPin = 4;
-const button = new Gpio(buttonPin, 'in', 'both', {debounceTimeout: 10})
+if (process.platform == 'linux') {
+    const buttonPin = 4;
+    const button = new Gpio(buttonPin, 'in', 'both', {debounceTimeout: 10})
+}
 
 
 ////////////////////
@@ -66,6 +68,7 @@ setInterval( async () => {
         let strippedMessage = formatter.stripHTML(message.lastMessage)
 
         let wrappedMessage = formatter.wrap(strippedMessage, 48)
+        console.log(wrappedMessage);
         currentPrinter.printRaw(wrappedMessage)
     } else {
         console.log('no new message')
@@ -73,12 +76,15 @@ setInterval( async () => {
     }
 }, LOOP_TIMER);
 
-// Watch for button press to call the wind function
-button.watch((err, value) =>{
-    if(err) throw err;
-    wind();
-    //button.unexport();
-})
+
+if (process.platform == 'linux') {
+    // Watch for button press to call the wind function
+    button.watch((err, value) =>{
+        if(err) throw err;
+        wind();
+        //button.unexport();
+    })
+}
 
 
 
