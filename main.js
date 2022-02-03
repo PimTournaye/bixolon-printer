@@ -35,7 +35,7 @@ let tempPrinterArray = [];
 
 // Make Printer objects for each element in the array
 ticketPrinters.forEach(element => {
-    let printer = new Printer(element.name)
+    let printer = new Printer(element.ticketPrinter.name)
     tempPrinterArray.push(printer);
 })
 
