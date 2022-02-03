@@ -11,8 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "@thiagoelg/node-printer": "^0.5.6",
-    "body-parser": "^1.19.1",
-    "express": "^4.17.2",
     "lodash": "^4.17.21",
     "node-fetch": "^3.2.0",
     "onoff": "^6.0.3"
@@ -27,6 +25,5 @@
   "homepage": "https://github.com/PimTournaye/bixolon-printer#readme",
   "description": "",
   "devDependencies": {
-    "@faker-js/faker": "^6.0.0-alpha.5"
   }
 }
