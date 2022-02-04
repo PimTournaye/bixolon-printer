@@ -4,7 +4,12 @@ export default class TextFormatter {
     }
 
     stripHTML(text){
+
         let strippedString = text.replace(/(<([^>]+)>)/gi, "");
+        var str = '#this #is__ __#a test###__';
+        strippedString.replace(/&rsquo;/g,`'`);
+
+
         return strippedString;
     }
 
