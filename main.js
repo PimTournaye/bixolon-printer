@@ -2,13 +2,17 @@ import Fetcher from './fetch.js';
 import Printer from './printer.js';
 import TextFormatter from './textFormatter.js';
 import { Gpio } from 'onoff';
-import legacy from "legacy-encoding";
 
 import printer from '@thiagoelg/node-printer';
 import _ from 'lodash';
 
+import fs from 'fs';
+import util from 'util'
+
 let fetcher = new Fetcher();
 let formatter = new TextFormatter();
+
+let file = fs.readFileSync('./output2.pdf')
 
 /////////////////
 // SETUP ////////
@@ -70,8 +74,8 @@ setInterval( async () => {
 
         let wrappedMessage = formatter.wrap(strippedMessage, 48);
 
-        legacy.encode(wrappedMessage, "utf8");
         currentPrinter.printRaw(wrappedMessage)
+        
     } else {
         console.log('no new message')
         //console.log(message);
@@ -80,15 +84,15 @@ setInterval( async () => {
 
 
 if (process.platform == 'linux') {
+    console.log('watching for GPIO input');
     // Watch for button press to call the wind function
     button.watch((err, value) =>{
+        console.log('PRESSED!');
         if(err) throw err;
         wind();
         //button.unexport();
     })
 }
-
-
 
 
 
@@ -114,7 +118,8 @@ const wind = () => {
     
             let currentPrinter = _.sample(ticketPrinters);
 
-            currentPrinter.printRaw(wrappedMessage);
+            //currentPrinter.printRaw(wrappedMessage);
+            
             
         }, 2000);
 
