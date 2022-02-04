@@ -2,9 +2,10 @@ import Fetcher from './fetch.js';
 import Printer from './printer.js';
 import TextFormatter from './textFormatter.js';
 import { Gpio } from 'onoff';
+import legacy from "legacy-encoding";
 
 import printer from '@thiagoelg/node-printer';
-import _, { debounce } from 'lodash';
+import _ from 'lodash';
 
 let fetcher = new Fetcher();
 let formatter = new TextFormatter();
@@ -47,10 +48,10 @@ const LOOP_TIMER = 10000
 
 
 // GPIO setup
-if (process.platform == 'linux') {
+
     const buttonPin = 4;
     const button = new Gpio(buttonPin, 'in', 'both', {debounceTimeout: 10})
-}
+
 
 
 ////////////////////
@@ -60,15 +61,16 @@ if (process.platform == 'linux') {
 setInterval( async () => {
     let message = await fetcher.getLatest()
     if (message.hasNewMessage == true) {
-        console.log('new message', message.lastMessage)
+        console.log('new message', message.lastMessage);
 
         // Get a random printer from our array of available printers
         let currentPrinter = _.sample(ticketPrinters);
         //Get rid of HTML tags so we can cleanly print the message
-        let strippedMessage = formatter.stripHTML(message.lastMessage)
+        let strippedMessage = formatter.stripHTML(message.lastMessage);
 
-        let wrappedMessage = formatter.wrap(strippedMessage, 48)
-        console.log(wrappedMessage);
+        let wrappedMessage = formatter.wrap(strippedMessage, 48);
+
+        legacy.encode(wrappedMessage, "utf8");
         currentPrinter.printRaw(wrappedMessage)
     } else {
         console.log('no new message')
@@ -98,19 +100,25 @@ if (process.platform == 'linux') {
 // Function for emulating tons of new messages coming in
 const wind = () => {
     let amount = _.random(12, 50)
-    let messages = [];
     
     let someMessages = fetcher.getSome(amount);
 
     someMessages.forEach(data => {
-        const message = data[0].content.rendered;
-        
-        //Get rid of HTML tags so we can cleanly print the message
-        let strippedMessage = formatter.stripHTML(message)
-        // Make sure no words get split when starting a new line
-        let wrappedMessage = formatter.wrap(strippedMessage, 48)
+        setTimeout(() => {
+            const message = data[0].content.rendered;
+            
+            //Get rid of HTML tags so we can cleanly print the message
+            let strippedMessage = formatter.stripHTML(message)
+            // Make sure no words get split when starting a new line
+            let wrappedMessage = formatter.wrap(strippedMessage, 48)
+    
+            let currentPrinter = _.sample(ticketPrinters);
 
-        let currentPrinter = _.sample(ticketPrinters);
+            currentPrinter.printRaw(wrappedMessage);
+            
+        }, 2000);
+
+
     });
 
 
