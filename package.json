@@ -10,10 +10,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@thiagoelg/node-printer": "^0.5.6",
+    "@thiagoelg/node-printer": "^0.5.7",
+    "legacy-encoding": "^3.0.0",
     "lodash": "^4.17.21",
     "node-fetch": "^3.2.0",
-    "onoff": "^6.0.3"
+    "onoff": "^6.0.3",
+    "pdfkit": "^0.13.0",
+    "utf8": "^3.0.0"
   },
   "repository": {
     "type": "git",
@@ -23,7 +26,5 @@
     "url": "https://github.com/PimTournaye/bixolon-printer/issues"
   },
   "homepage": "https://github.com/PimTournaye/bixolon-printer#readme",
-  "description": "",
-  "devDependencies": {
-  }
+  "description": ""
 }
