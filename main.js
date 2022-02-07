@@ -191,8 +191,9 @@ const wind = () => {
 let codesheetTest = () => {
     let message = await fetcher.getLatest()
     codesheets.forEach(sheet => {
-    if (message.hasNewMessage == true) {
-        console.log('new message', message.lastMessage);
+        setTimeout(() => {
+            
+        }, 2000);
 
         // Get a random printer from our array of available printers
         let currentPrinter = _.sample(ticketPrinters);
@@ -207,5 +208,5 @@ let codesheetTest = () => {
             .encode()
 
         currentPrinter.printRaw(encodedMsg)
-    }
+    
 })}
