@@ -188,7 +188,7 @@ const wind = () => {
     });
 }
 
-let codesheetTest = () => {
+let codesheetTest = async () => {
     let message = await fetcher.getLatest()
     codesheets.forEach(sheet => {
         setTimeout(() => {
