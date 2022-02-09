@@ -51,7 +51,6 @@ let CODES = {
 }
 
 
-let testString = ` ' character test << >> … ÀÁÂÏȊ äæéẽëěęḙḛéêèçöṻ c'est « test » & @ ‼ ⁈ '`
 // Will get to refactoring later once I know what I need
 export default class Printer {
     constructor(printerName) {
@@ -67,11 +66,15 @@ export default class Printer {
             lineCharacter: "-",
         });
 
+        let formatted = formatter.addWhiteSpace(text);
+        formatted = formatter.stripHTML(formatted);
+
         epsonThermalPrinter.append(INITIAL_PRINTER);
         epsonThermalPrinter.append(IMAGE);
+        
+        epsonThermalPrinter.println(formatted);
         epsonThermalPrinter.newLine();
-        epsonThermalPrinter.println(text);
-        epsonThermalPrinter.newLine();
+
         epsonThermalPrinter.append(PAPER_CUTTING);
         epsonThermalPrinter.append(PAPER_EJECT);
     

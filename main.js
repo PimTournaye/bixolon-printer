@@ -52,7 +52,7 @@ ticketPrinters.forEach(element => {
 ticketPrinters = tempPrinterArray;
 
 // Important variables
-const LOOP_TIMER = 100000
+let LOOP_TIMER = 10000
 
 
 // GPIO setup
@@ -68,26 +68,25 @@ const LOOP_TIMER = 100000
 // MAIN LOOP ///////
 ////////////////////
 
-// let main = setInterval(async () => {
-//     let message = await fetcher.getLatest()
-//     if (message.hasNewMessage == true) {
-//         console.log('new message', message.lastMessage);
+let normalState = setInterval(async () => {
+    let message = await fetcher.getLatest()
+    if (message.hasNewMessage == true) {
+        console.log('new message', message.lastMessage);
 
-//         // Get a random printer from our array of available printers
-//         let currentPrinter = _.sample(ticketPrinters);
-//         //Get rid of HTML tags so we can cleanly print the message
-//         let strippedMessage = formatter.stripHTML(message.lastMessage);
+        // Get a random printer from our array of available printers
+        let currentPrinter = _.sample(ticketPrinters);
+        //Get rid of HTML tags so we can cleanly print the message
+        let strippedMessage = formatter.stripHTML(message.lastMessage);
 
-//         let wrappedMessage = formatter.wrap(strippedMessage, 48);
+        let wrappedMessage = formatter.wrap(strippedMessage, 48);
 
-//         currentPrinter.printRaw(wrappedMessage)
+        currentPrinter.execute(wrappedMessage)
 
-//     } else {
-//         console.log('no new message')
-//         //console.log(message);
-//     }
-// }, LOOP_TIMER);
-
+    } else {
+        console.log('no new message')
+        //console.log(message);
+    }
+}, LOOP_TIMER);
 
 if (process.platform == 'linux') {
     console.log('watching for GPIO input');
@@ -175,7 +174,7 @@ let singleTest = async () => {
     //currentPrinter.printFile(file)
 }
 
-singleTest();
+//singleTest();
 
 
 //codesheetTest();
