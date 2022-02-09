@@ -7,11 +7,8 @@ import delay from 'delay'
 import printer from '@thiagoelg/node-printer';
 import _ from 'lodash';
 
-
 let fetcher = new Fetcher();
 let formatter = new TextFormatter();
-
-//let file = fs.readFileSync('./output2.pdf')
 
 /////////////////
 // SETUP ////////
@@ -50,10 +47,11 @@ ticketPrinters = tempPrinterArray;
 let LOOP_TIMER = 10000
 let fakeCounter = 0;
 let fakeThreshold = 15;
+let pressState = false;
 
-/////////////////
-// GPIO setup ///
-/////////////////
+/////////////////////
+// GPIO setup ///////
+/////////////////////
 
 
 // const buttonPin = 4;
@@ -69,49 +67,66 @@ let fakeThreshold = 15;
 //     in8: new Gpio(1, 'out'),
 // }
 
-
 ////////////////////
 // MAIN LOOP ///////
 ////////////////////
 
-let normalLoop = setTimeout(async () => {
-    let message = await fetcher.getLatest()
-    if (message.hasNewMessage == true) {
-        console.log('new message', message.lastMessage);
-
+let normalMode = () => {
+        // Get last message
+        let message = await fetcher.getLatest()
+        // Get some of the past messages just to be sure
+        let pastMessages = await fetcher.getSome(50);
         // Get a random printer from our array of available printers
         let currentPrinter = _.sample(ticketPrinters);
-        //Get rid of HTML tags so we can cleanly print the message
-        let strippedMessage = formatter.stripHTML(message.lastMessage);
-
-        let wrappedMessage = formatter.wrap(strippedMessage, 48);
-
-        // blink the relays UNCOMMENT THIS ON THE PI
-        // for (const key in RELAY) {
-        //     const relay = RELAY[key];
-        //     blink(relay, LOOP_TIMER / 2)
-        // }
-        await delay(2000)
-        currentPrinter.execute(wrappedMessage)
-        // reset the fake counter
-        fakeCounter = 0;
-    } else if (fakeCounter == fakeThreshold){
         
-    } else {
-        fakeCounter++
-        console.log('no new message')
-    }
-}, LOOP_TIMER);
+        // Check if it's a new message
+        if (message.hasNewMessage == true) {
+            console.log('new message', message.lastMessage);
+            
+            //Get rid of HTML tags so we can cleanly print the message
+            let strippedMessage = formatter.stripHTML(message.lastMessage);
+            // Wrap the message so it doesn't split words on the ticket
+            let wrappedMessage = formatter.wrap(strippedMessage, 48);
+    
+            // blink the relays UNCOMMENT THIS ON THE PI
+            // for (const key in RELAY) {
+            //     const relay = RELAY[key];
+            //     blink(relay, LOOP_TIMER / 2)
+            // }
+    
+            currentPrinter.execute(wrappedMessage)
+            // reset the fake counter
+            fakeCounter = 0;
+        } else if (fakeCounter == fakeThreshold){
+            let fakeMessage = _.sample(pastMessages);
+            let content = fakeMessage.content.rendered;
 
-let pressLoop = async () => {
+            // Beginning formatting
+            content = formatter.stripHTML(content)
+            content = formatter.wrap(content);
+
+            //Send to printer
+            currentPrinter.execute(content)
+        } else {
+            fakeCounter++
+            console.log('no new message')
+        }
+}    
+
+
+// Loop for when there is press, also know as FAST MODE
+let fastMode = async () => {
+    // Set a random amount
     let amount = _.random(50, 100)
 
+    // Get that amount of messages from the API
     let someMessages = await fetcher.getSome(amount);
 
-    console.log(someMessages);
-
-    someMessages.forEach(data => {
+    // Check for boolean to commence with the main loop
+    if(pressState == true){
+    someMessages.forEach((data, i)=> {
         setTimeout(() => {
+            // Get the content out of the object
             const message = data.content.rendered;
 
             //Get rid of HTML tags so we can cleanly print the message
@@ -119,36 +134,32 @@ let pressLoop = async () => {
             // Make sure no words get split when starting a new line
             let wrappedMessage = formatter.wrap(strippedMessage, 48)
 
+            // Get a random printer
             let currentPrinter = _.sample(ticketPrinters);
-
+            // Print the message
             //currentPrinter.execute(wrappedMessage)
-
-        }, 2000);
-        console.log('no');
-    });
-    console.log('yes');
+            console.log('printed', i);
+        }, LOOP_TIMER * i);;
+    });}
 }
 
-
-pressLoop();
 let main = () => {
 
-    const GPIO_SWITCH = null;
-
+    const GPIO_SWITCH = null; // DELETE THIS ON LINE THE PI !!!!
     GPIO_SWITCH.watch((err, value) => {
 
         if (value == 'HIGH') {
             LOOP_TIMER = 2000;
-            pressloop();
+            pressState = true;
+            await fastMode();
         } else {
             LOOP_TIMER = 10000;
-            normalLoop();
+            pressState = false;
+            normalMode();
         }
 
     })
 }
-
-
 
 ///////////////////////
 // Other functions ////
@@ -161,9 +172,10 @@ let blink = (relay, timer) => {
     // const led = new Gpio(17, 'out');       // Export GPIO17 as an output
     let stopBlinking = false;
     
-    // Toggle the state of the LED connected to GPIO17 every 200ms
+    // Toggle the state of the connected GPIO every 200ms
     const blinkingState = _ => {
         if (stopBlinking) {
+            console.log('stop the blinking of', relay);
             return led.unexport();
         }
         
@@ -180,7 +192,7 @@ let blink = (relay, timer) => {
             });
         });
         
-        setTimeout(blinkLed, 200);
+        setTimeout(blinkingState, 200);
     };
     // Stop blinking the LED after 5 seconds
     setTimeout(_ => stopBlinking = true, timer);
