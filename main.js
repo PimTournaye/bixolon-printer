@@ -1,11 +1,11 @@
-import Fetcher from './fetch.js';
-import Printer from './printer.js';
-import TextFormatter from './textFormatter.js';
-import {Gpio} from 'onoff';
-import delay from 'delay'
+import Fetcher from "./fetch.js";
+import Printer from "./printer.js";
+import TextFormatter from "./textFormatter.js";
+import { Gpio } from "onoff";
+import delay from "delay";
 
-import printer from '@thiagoelg/node-printer';
-import _ from 'lodash';
+import printer from "@thiagoelg/node-printer";
+import _ from "lodash";
 
 let fetcher = new Fetcher();
 let formatter = new TextFormatter();
@@ -19,15 +19,15 @@ let ticketPrinters = [];
 let printerID = 0;
 
 // Put all Bixolon printers in an array
-printer.getPrinters().forEach(element => {
-    let name = element.name
-    if (name.includes('BIXOLON')) {
-        ticketPrinters.push({
-            ticketPrinter: element,
-            ID: printerID
-        });
-        printerID++;
-    } else console.log('skipping non-bixolon printer');
+printer.getPrinters().forEach((element) => {
+  let name = element.name;
+  if (name.includes("BIXOLON")) {
+    ticketPrinters.push({
+      ticketPrinter: element,
+      ID: printerID,
+    });
+    printerID++;
+  } else console.log("skipping non-bixolon printer");
 });
 
 console.log(ticketPrinters);
@@ -35,16 +35,16 @@ console.log(ticketPrinters);
 let tempPrinterArray = [];
 
 // Make Printer objects for each element in the array
-ticketPrinters.forEach(element => {
-    let printer = new Printer(element.ticketPrinter.name)
-    tempPrinterArray.push(printer);
-})
+ticketPrinters.forEach((element) => {
+  let printer = new Printer(element.ticketPrinter.name);
+  tempPrinterArray.push(printer);
+});
 
 // Replace our list of printers with the correct objects
 ticketPrinters = tempPrinterArray;
 
 // Important variables
-let LOOP_TIMER = 10000
+let LOOP_TIMER = 10000;
 let fakeCounter = 0;
 let fakeThreshold = 15;
 let pressState = false;
@@ -52,7 +52,6 @@ let pressState = false;
 /////////////////////
 // GPIO setup ///////
 /////////////////////
-
 
 // const buttonPin = 4;
 // const GPIO_SWITCH = new Gpio(buttonPin, 'in', 'both');
@@ -72,94 +71,99 @@ let pressState = false;
 ////////////////////
 
 let normalMode = () => {
-        // Get last message
-        let message = await fetcher.getLatest()
-        // Get some of the past messages just to be sure
-        let pastMessages = await fetcher.getSome(50);
-        // Get a random printer from our array of available printers
-        let currentPrinter = _.sample(ticketPrinters);
-        
-        // Check if it's a new message
-        if (message.hasNewMessage == true) {
-            console.log('new message', message.lastMessage);
-            
-            //Get rid of HTML tags so we can cleanly print the message
-            let strippedMessage = formatter.stripHTML(message.lastMessage);
-            // Wrap the message so it doesn't split words on the ticket
-            let wrappedMessage = formatter.wrap(strippedMessage, 48);
-    
-            // blink the relays UNCOMMENT THIS ON THE PI
-            // for (const key in RELAY) {
-            //     const relay = RELAY[key];
-            //     blink(relay, LOOP_TIMER / 2)
-            // }
-    
-            currentPrinter.execute(wrappedMessage)
-            // reset the fake counter
-            fakeCounter = 0;
-        } else if (fakeCounter == fakeThreshold){
-            let fakeMessage = _.sample(pastMessages);
-            let content = fakeMessage.content.rendered;
+  // Get last message
+  let message = await fetcher.getLatest();
+  // Get some of the past messages just to be sure
+  let pastMessages = await fetcher.getSome(50);
+  // Get a random printer from our array of available printers
+  let currentPrinter = _.sample(ticketPrinters);
 
-            // Beginning formatting
-            content = formatter.stripHTML(content)
-            content = formatter.wrap(content);
+  // Check if it's a new message
+  if (message.hasNewMessage == true) {
+    console.log("new message", message.lastMessage);
 
-            //Send to printer
-            currentPrinter.execute(content)
-        } else {
-            fakeCounter++
-            console.log('no new message')
-        }
-}    
+    //Get rid of HTML tags so we can cleanly print the message
+    let strippedMessage = formatter.stripHTML(message.lastMessage);
+    // Wrap the message so it doesn't split words on the ticket
+    let wrappedMessage = formatter.wrap(strippedMessage, 48);
 
+    // blink the relays UNCOMMENT THIS ON THE PI
+    // for (const key in RELAY) {
+    //     const relay = RELAY[key];
+    //     blink(relay, LOOP_TIMER / 2)
+    // }
+    // Print the message with a bit of a delay
+    setTimeout(() => {
+      //currentPrinter.execute(wrappedMessage);
+    }, LOOP_TIMER)
+
+    console.log('normal printed');
+    // reset the fake counter
+    fakeCounter = 0;
+  } else if (fakeCounter == fakeThreshold) {
+    let fakeMessage = _.sample(pastMessages);
+    let content = fakeMessage.content.rendered;
+
+    // Beginning formatting
+    content = formatter.stripHTML(content);
+    content = formatter.wrap(content);
+
+    //Send to printer
+    currentPrinter.execute(content);
+    console.log('reached treshold');
+    fakeCounter = 0;
+  } else {
+    fakeCounter++;
+    console.log("no new message");
+  }
+};
 
 // Loop for when there is press, also know as FAST MODE
 let fastMode = async () => {
-    // Set a random amount
-    let amount = _.random(50, 100)
+  // Set a random amount
+  let amount = _.random(50, 100);
 
-    // Get that amount of messages from the API
-    let someMessages = await fetcher.getSome(amount);
+  // Get that amount of messages from the API
+  let someMessages = await fetcher.getSome(amount);
 
-    // Check for boolean to commence with the main loop
-    if(pressState == true){
-    someMessages.forEach((data, i)=> {
-        setTimeout(() => {
-            // Get the content out of the object
-            const message = data.content.rendered;
+  // Check for boolean to commence with the main loop
+  if (pressState == true) {
+    someMessages.forEach((data, i) => {
+      setTimeout(() => {
+        // Get the content out of the object
+        const message = data.content.rendered;
 
-            //Get rid of HTML tags so we can cleanly print the message
-            let strippedMessage = formatter.stripHTML(message)
-            // Make sure no words get split when starting a new line
-            let wrappedMessage = formatter.wrap(strippedMessage, 48)
+        //Get rid of HTML tags so we can cleanly print the message
+        let strippedMessage = formatter.stripHTML(message);
+        // Make sure no words get split when starting a new line
+        let wrappedMessage = formatter.wrap(strippedMessage, 48);
 
-            // Get a random printer
-            let currentPrinter = _.sample(ticketPrinters);
-            // Print the message
-            //currentPrinter.execute(wrappedMessage)
-            console.log('printed', i);
-        }, LOOP_TIMER * i);;
-    });}
-}
+        // Get a random printer
+        let currentPrinter = _.sample(ticketPrinters);
+        // Print the message
+        //currentPrinter.execute(wrappedMessage)
+        console.log("printed", i);
+      }, LOOP_TIMER * i);
+    });
+  }
+};
 
-let main = () => {
+let main = async () => {
+  const GPIO_SWITCH = null; // DELETE THIS ON LINE THE PI !!!!
+  GPIO_SWITCH.watch((err, value) => {
+    console.log(value);
 
-    const GPIO_SWITCH = null; // DELETE THIS ON LINE THE PI !!!!
-    GPIO_SWITCH.watch((err, value) => {
-
-        if (value == 'HIGH') {
-            LOOP_TIMER = 2000;
-            pressState = true;
-            await fastMode();
-        } else {
-            LOOP_TIMER = 10000;
-            pressState = false;
-            normalMode();
-        }
-
-    })
-}
+    if (value == "HIGH") {
+      LOOP_TIMER = 2000;
+      pressState = true;
+      await fastMode();
+    } else {
+      LOOP_TIMER = 10000;
+      pressState = false;
+      await normalMode();
+    }
+  });
+};
 
 ///////////////////////
 // Other functions ////
@@ -167,67 +171,43 @@ let main = () => {
 
 // Blinking func for the relays
 let blink = (relay, timer) => {
-    
-    //const Gpio = require('../onoff').Gpio; // Gpio class
-    // const led = new Gpio(17, 'out');       // Export GPIO17 as an output
-    let stopBlinking = false;
-    
-    // Toggle the state of the connected GPIO every 200ms
-    const blinkingState = _ => {
-        if (stopBlinking) {
-            console.log('stop the blinking of', relay);
-            return led.unexport();
+  //const Gpio = require('../onoff').Gpio; // Gpio class
+  // const led = new Gpio(17, 'out');       // Export GPIO17 as an output
+  let stopBlinking = false;
+
+  // Toggle the state of the connected GPIO every 200ms
+  const blinkingState = (_) => {
+    if (stopBlinking) {
+      console.log("stop the blinking of", relay);
+      return led.unexport();
+    }
+
+    relay.read((err, value) => {
+      // Asynchronous read
+      if (err) {
+        throw err;
+      }
+
+      relay.write(value ^ 1, (err) => {
+        // Asynchronous write
+        console.log("blink!");
+        if (err) {
+          throw err;
         }
-        
-        relay.read((err, value) => { // Asynchronous read
-            if (err) {
-                throw err;
-            }
-            
-            relay.write(value ^ 1, err => { // Asynchronous write
-                console.log('blink!');
-                if (err) {
-                    throw err;
-                }
-            });
-        });
-        
-        setTimeout(blinkingState, 200);
-    };
-    // Stop blinking the LED after 5 seconds
-    setTimeout(_ => stopBlinking = true, timer);
-}
+      });
+    });
+
+    setTimeout(blinkingState, 200);
+  };
+  // Stop blinking the LED after 5 seconds
+  setTimeout((_) => (stopBlinking = true), timer);
+};
 
 let codesheetTest = async () => {
-    let message = await fetcher.getLatest()
-    codesheets.forEach(codesheet => {
-        setTimeout(() => {
+  let message = await fetcher.getLatest();
+  codesheets.forEach((codesheet) => {
+    setTimeout(() => {}, 2000);
 
-        }, 2000);
-
-        // Get a random printer from our array of available printers
-        let currentPrinter = _.sample(ticketPrinters);
-        //Get rid of HTML tags so we can cleanly print the message
-        let strippedMessage = formatter.stripHTML(message.lastMessage);
-
-        let wrappedMessage = formatter.wrap(strippedMessage, 48);
-
-        let converted = formatter.converter(wrappedMessage)
-        try {
-            currentPrinter.printRaw(`${formatter.addWhiteSpace(converted)}
-            
-            
-            encoding: ${codesheet}`, codesheet);
-        } catch (error) {
-            console.error(error);
-        }
-
-    })
-}
-let singleTest = async () => {
-
-    let codesheet = "iso88596";
-    let message = await fetcher.getLatest()
     // Get a random printer from our array of available printers
     let currentPrinter = _.sample(ticketPrinters);
     //Get rid of HTML tags so we can cleanly print the message
@@ -235,8 +215,34 @@ let singleTest = async () => {
 
     let wrappedMessage = formatter.wrap(strippedMessage, 48);
 
-    let converted = formatter.converter(wrappedMessage)
-    currentPrinter.execute(converted);
+    let converted = formatter.converter(wrappedMessage);
+    try {
+      currentPrinter.printRaw(
+        `${formatter.addWhiteSpace(converted)}
+            
+            
+            encoding: ${codesheet}`,
+        codesheet
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  });
+};
+let singleTest = async () => {
+  let codesheet = "iso88596";
+  let message = await fetcher.getLatest();
+  // Get a random printer from our array of available printers
+  let currentPrinter = _.sample(ticketPrinters);
+  //Get rid of HTML tags so we can cleanly print the message
+  let strippedMessage = formatter.stripHTML(message.lastMessage);
 
-    //currentPrinter.printFile(file)
-}
+  let wrappedMessage = formatter.wrap(strippedMessage, 48);
+
+  let converted = formatter.converter(wrappedMessage);
+  currentPrinter.execute(converted);
+
+  //currentPrinter.printFile(file)
+};
+
+main();
