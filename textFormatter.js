@@ -27,4 +27,9 @@ export default class TextFormatter {
 
         return first;
     }
+
+    apostrophe(text){
+        let message = text.replace(new RegExp((`‘’‛❜❛'′❜❛＇)\w+`), "'"));
+        return message;
+    }
 }
