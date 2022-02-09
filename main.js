@@ -2,6 +2,7 @@ import Fetcher from './fetch.js';
 import Printer from './printer.js';
 import TextFormatter from './textFormatter.js';
 import {Gpio} from 'onoff';
+import delay from 'delay'
 
 import printer from '@thiagoelg/node-printer';
 import _ from 'lodash';
@@ -47,24 +48,26 @@ ticketPrinters = tempPrinterArray;
 
 // Important variables
 let LOOP_TIMER = 10000
+let fakeCounter = 0;
+let fakeThreshold = 15;
 
 /////////////////
 // GPIO setup ///
 /////////////////
 
 
-const buttonPin = 4;
-const GPIO_SWITCH = new Gpio(buttonPin, 'in', 'both');
-const RELAY = {
-    in1: new Gpio(1, 'out'),
-    in2: new Gpio(1, 'out'),
-    in3: new Gpio(1, 'out'),
-    in4: new Gpio(1, 'out'),
-    in5: new Gpio(1, 'out'),
-    in6: new Gpio(1, 'out'),
-    in7: new Gpio(1, 'out'),
-    in8: new Gpio(1, 'out'),
-}
+// const buttonPin = 4;
+// const GPIO_SWITCH = new Gpio(buttonPin, 'in', 'both');
+// const RELAY = {
+//     in1: new Gpio(1, 'out'),
+//     in2: new Gpio(1, 'out'),
+//     in3: new Gpio(1, 'out'),
+//     in4: new Gpio(1, 'out'),
+//     in5: new Gpio(1, 'out'),
+//     in6: new Gpio(1, 'out'),
+//     in7: new Gpio(1, 'out'),
+//     in8: new Gpio(1, 'out'),
+// }
 
 
 ////////////////////
@@ -83,23 +86,33 @@ let normalLoop = setTimeout(async () => {
 
         let wrappedMessage = formatter.wrap(strippedMessage, 48);
 
-        blink(RELAY.in1, LOOP_TIMER / 2)
-        setTimeout(() => {
-            currentPrinter.execute(wrappedMessage)
-        }, LOOP_TIMER / 2)
+        // blink the relays UNCOMMENT THIS ON THE PI
+        // for (const key in RELAY) {
+        //     const relay = RELAY[key];
+        //     blink(relay, LOOP_TIMER / 2)
+        // }
+        await delay(2000)
+        currentPrinter.execute(wrappedMessage)
+        // reset the fake counter
+        fakeCounter = 0;
+    } else if (fakeCounter == fakeThreshold){
+        
     } else {
+        fakeCounter++
         console.log('no new message')
     }
 }, LOOP_TIMER);
 
-let pressLoop = () => {
+let pressLoop = async () => {
     let amount = _.random(50, 100)
 
-    let someMessages = fetcher.getSome(amount);
+    let someMessages = await fetcher.getSome(amount);
+
+    console.log(someMessages);
 
     someMessages.forEach(data => {
         setTimeout(() => {
-            const message = data[0].content.rendered;
+            const message = data.content.rendered;
 
             //Get rid of HTML tags so we can cleanly print the message
             let strippedMessage = formatter.stripHTML(message)
@@ -108,15 +121,16 @@ let pressLoop = () => {
 
             let currentPrinter = _.sample(ticketPrinters);
 
-            currentPrinter.execute(wrappedMessage);
-
+            //currentPrinter.execute(wrappedMessage)
 
         }, 2000);
+        console.log('no');
     });
+    console.log('yes');
 }
 
 
-
+pressLoop();
 let main = () => {
 
     const GPIO_SWITCH = null;
@@ -159,6 +173,7 @@ let blink = (relay, timer) => {
             }
             
             relay.write(value ^ 1, err => { // Asynchronous write
+                console.log('blink!');
                 if (err) {
                     throw err;
                 }
@@ -167,7 +182,6 @@ let blink = (relay, timer) => {
         
         setTimeout(blinkLed, 200);
     };
-    
     // Stop blinking the LED after 5 seconds
     setTimeout(_ => stopBlinking = true, timer);
 }

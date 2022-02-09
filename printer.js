@@ -68,6 +68,9 @@ export default class Printer {
 
         let formatted = formatter.addWhiteSpace(text);
         formatted = formatter.stripHTML(formatted);
+        console.log(formatted);
+        formatted = formatter.apostrophe(formatted);
+        console.log(formatted);
 
         epsonThermalPrinter.append(INITIAL_PRINTER);
         epsonThermalPrinter.append(IMAGE);
@@ -78,6 +81,7 @@ export default class Printer {
         epsonThermalPrinter.append(PAPER_CUTTING);
         epsonThermalPrinter.append(PAPER_EJECT);
     
+
         printDirect({
             data: epsonThermalPrinter.getBuffer(),
             printer: PRINTER_NAME,
