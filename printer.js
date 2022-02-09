@@ -120,7 +120,7 @@ export default class Printer {
 
     prepareData(data, codepage) {
 
-        let preparedData = Buffer.from(INITIAL_PRINTER) + Buffer.from(IMAGE) + Buffer.from(codepage) + Buffer.from(data) + Buffer.from(`\n\n${codepage}`) + Buffer.from(PAPER_CUTTING) + Buffer.from(PAPER_EJECT);
+        let preparedData = Buffer.from(INITIAL_PRINTER) + Buffer.from(IMAGE) + Buffer.from(codepage) + Buffer.from(data) + Buffer.from(PAPER_CUTTING) + Buffer.from(PAPER_EJECT);
         console.log("preparedData: ", preparedData);
         return preparedData;
     }
