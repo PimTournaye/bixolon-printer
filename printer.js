@@ -79,7 +79,7 @@ export default class Printer {
 
         printDirect({
             data: epsonThermalPrinter.getBuffer(),
-            printer: PRINTER_NAME,
+            printer: this.name,
             type: 'RAW',
             success: function (jobID) {
                 console.log(`printer job: ${jobID}`);
@@ -96,7 +96,4 @@ export default class Printer {
         console.log("preparedData: ", preparedData);
         return preparedData;
     }
-
-
-    
-    }
+}
