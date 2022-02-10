@@ -76,7 +76,9 @@ let fakeThreshold = 6;
 // Init to check if fastmode is interrupted
 let cancelled;
 
+// Amount of time a blink of the light will take
 let relayNormalLength = NORMAL_TIMER / 20;
+// Amount of times the lights will blink
 let relayNormalAmount = 4;
 
 /////////////////////
@@ -84,7 +86,6 @@ let relayNormalAmount = 4;
 /////////////////////
 
 // Johnny-five
-const GPIO_SWITCH = new Switch("GPIO4");
 const RELAY = {
   in1: new Led("GPIO26", "out"),
   in2: new Led("GPIO19", "out"),
@@ -236,6 +237,7 @@ board.on("ready", async () => {
 
   modeSwitch.on("open", async () => {
     console.log('switching to fast mode');
+    // Stop normal mode interval
     clearInterval(loop)
     fast = await fastMode();
   });
@@ -243,7 +245,10 @@ board.on("ready", async () => {
   modeSwitch.on("close", async () => {
     console.log("switching to normal mode");
     cancelled = true;
-    clearInterval(fastMode)
+    // Stop fastMode, even if it's the middle of something
+    //clearInterval(fastMode) this needs a fix
+
+    // Repeat the normalMode function at a set interval
     loop = setInterval(async () => {
       await normalMode();
     }, NORMAL_TIMER);
