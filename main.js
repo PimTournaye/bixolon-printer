@@ -53,18 +53,31 @@ let tempPrinterArray = [];
 ticketPrinters.forEach((element) => {
   let printer = new Printer(element.ticketPrinter.name);
   tempPrinterArray.push(printer);
+  printer.execute('test')
 });
 
 // Replace our list of printers with the correct objects
 ticketPrinters = tempPrinterArray;
 
-// Important variables
+/////////////////////////
+// IMPORTANT VARIABLES //
+/////////////////////////
+
+// Timer for how long it takes to print any messgae while in fastmode (in milliseconds)
 const FAST_TIMER = 10000;
+// Timer for how long it takes to check for a message while in normal mode (in milliseconds)
 const NORMAL_TIMER = 10000;
+
+// Init counter
 let fakeCounter = 0;
+// Amount of times it takes to print an old message after there hasn't been a new one
 let fakeThreshold = 6;
 
+// Init to check if fastmode is interrupted
 let cancelled;
+
+let relayNormalLength = NORMAL_TIMER / 20;
+let relayNormalAmount = 4;
 
 /////////////////////
 // GPIO setup ///////
@@ -83,9 +96,9 @@ const RELAY = {
   in8: new Led("GPIO17", "out"),
 };
 
-////////////////////
-// MAIN LOOP ///////
-////////////////////
+/////////////////////////
+// MAIN FUCNTIONS ///////
+/////////////////////////
 
 let normalMode = async () => {
   // Get last message
@@ -94,8 +107,7 @@ let normalMode = async () => {
   let pastMessages = await fetcher.getSome(50);
   // Get a random printer from our array of available printers
   let currentPrinter = _.sample(ticketPrinters);
-  // Initialize variable for later
-  let normalBlink;
+
   // Check if it's a new message
   if (message.hasNewMessage == true) {
     console.log("new message");
@@ -108,15 +120,15 @@ let normalMode = async () => {
     // Blink the relays
     //normalBlink = relayBlink(500);
 
-    blinker(NORMAL_TIMER / 4, 2);
+    blinker(NORMAL_TIMER / 20, 4);
     // Print the message with a bit of a delay
     setTimeout(() => {
-      //currentPrinter.execute(wrappedMessage);
+      currentPrinter.execute(wrappedMessage);
       console.log("normal print with timeout");
     }, NORMAL_TIMER);
     setTimeout(() => {
       //clearInterval(normalBlink);
-      
+
     }, NORMAL_TIMER - 200);
     // reset the fake counter
     fakeCounter = 0;
@@ -131,7 +143,7 @@ let normalMode = async () => {
     content = formatter.wrap(content);
 
     // Blink the relays
-    blinker(NORMAL_TIMER / 4, 2);
+    blinker(relayNormalLength, relayNormalAmount);
     //Send to printer
     currentPrinter.execute(content);
     console.log("reached treshold");
@@ -147,36 +159,38 @@ let fastMode = async () => {
   cancelled = false;
   // Set a random amount
   let amount = _.random(50, 100);
-  let blinkFast;
   // Get that amount of messages from the API
   let someMessages = await fetcher.getSome(amount);
-
+  console.log(cancelled);
   if (!cancelled) {
-    
-  
-  someMessages.forEach((data, i) => {
-    setTimeout(() => {
-      if (cancelled) break;
-      
-      // Get the content out of the object
-      const message = data.content.rendered;
+    console.log('commencing with fast mode');
+    someMessages.forEach((data, i) => {
+      console.log(cancelled);
+      setTimeout(() => {
+        // if (cancelled == true) {
+        //   console.log('stopping ongoing fastmode');
+        //   return;
+        // };
 
-      //Get rid of HTML tags so we can cleanly print the message
-      let strippedMessage = formatter.stripHTML(message);
-      // Make sure no words get split when starting a new line
-      let wrappedMessage = formatter.wrap(strippedMessage, 48);
-      // Get a random printer
-      let currentPrinter = _.sample(ticketPrinters);
+        // Get the content out of the object
+        const message = data.content.rendered;
 
-      //blinkFast = relayBlink(2000);
-      blinker(FAST_TIMER, 2)
+        //Get rid of HTML tags so we can cleanly print the message
+        let strippedMessage = formatter.stripHTML(message);
+        // Make sure no words get split when starting a new line
+        let wrappedMessage = formatter.wrap(strippedMessage, 48);
+        // Get a random printer
+        let currentPrinter = _.sample(ticketPrinters);
 
-      // Print the message
-      
-      //currentPrinter.execute(wrappedMessage)
-      console.log("printed", i);
-    }, FAST_TIMER * i);
-  })};
+        //blinker(FAST_TIMER / 6, 1)
+
+        // Print the message
+
+        //currentPrinter.execute(wrappedMessage)
+        console.log("ticket #", i);
+      }, FAST_TIMER * i);
+    })
+  };
   cancelled = true;
 };
 
@@ -186,22 +200,30 @@ let fastMode = async () => {
 
 // Blinking func for the relays
 let blinker = (timer, times) => {
-for (let i = 0; i <= times; i++) {
-  
+
+  for (let i = 0; i <= times; i++) {
+
     setTimeout(() => {
       for (const key in RELAY) {
+        let jitter = _.random(20, 300)
         const relay = RELAY[key];
-        relay.on();
+        setTimeout(() => {
+          relay.on();
+
+        }, jitter);
       }
     }, timer * i);
     setTimeout(() => {
       for (const key in RELAY) {
+        let jitter = _.random(20, 300)
         const relay = RELAY[key];
-        relay.off()
+        setTimeout(() => {
+          relay.off()
+        }, jitter);
       }
-    }, (timer + timer / 2) * i);
-  
-}
+    }, (timer * i + (timer / 2)));
+
+  }
 }
 /////////////////
 /// MAIN LOOP ///
@@ -213,16 +235,19 @@ board.on("ready", async () => {
   let fast;
 
   modeSwitch.on("open", async () => {
+    console.log('switching to fast mode');
     clearInterval(loop)
     fast = await fastMode();
-  }); 
+  });
 
   modeSwitch.on("close", async () => {
+    console.log("switching to normal mode");
     cancelled = true;
     clearInterval(fastMode)
-    loop = setInterval( async() => {
+    loop = setInterval(async () => {
       await normalMode();
     }, NORMAL_TIMER);
 
   } // test to see if we need an interval and a clear afterwards
-)});
+  )
+});
