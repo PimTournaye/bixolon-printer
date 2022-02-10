@@ -64,7 +64,7 @@ const NORMAL_TIMER = 10000;
 let fakeCounter = 0;
 let fakeThreshold = 6;
 
-let fastState = false;
+let cancelled;
 
 /////////////////////
 // GPIO setup ///////
@@ -143,14 +143,21 @@ let normalMode = async () => {
 };
 // Loop for when there is press, also know as FAST MODE
 let fastMode = async () => {
+
+  cancelled = false;
   // Set a random amount
   let amount = _.random(50, 100);
   let blinkFast;
   // Get that amount of messages from the API
   let someMessages = await fetcher.getSome(amount);
 
+  if (!cancelled) {
+    
+  
   someMessages.forEach((data, i) => {
     setTimeout(() => {
+      if (cancelled) break;
+      
       // Get the content out of the object
       const message = data.content.rendered;
 
@@ -162,14 +169,15 @@ let fastMode = async () => {
       let currentPrinter = _.sample(ticketPrinters);
 
       //blinkFast = relayBlink(2000);
+      blinker(FAST_TIMER, 2)
 
       // Print the message
       
-      currentPrinter.execute(wrappedMessage)
+      //currentPrinter.execute(wrappedMessage)
       console.log("printed", i);
     }, FAST_TIMER * i);
-  });
-  clearInterval(blinkFast);
+  })};
+  cancelled = true;
 };
 
 ///////////////////////
@@ -177,36 +185,13 @@ let fastMode = async () => {
 ///////////////////////
 
 // Blinking func for the relays
-let singleTest = async () => {
-  let codesheet = "iso88596";
-  let message = await fetcher.getLatest();
-  // Get a random printer from our array of available printers
-  let currentPrinter = _.sample(ticketPrinters);
-  //Get rid of HTML tags so we can cleanly print the message
-  let strippedMessage = formatter.stripHTML(message.lastMessage);
-
-  let wrappedMessage = formatter.wrap(strippedMessage, 48);
-
-  let converted = formatter.converter(wrappedMessage);
-  currentPrinter.execute(converted);
-};
-
-let relayBlink = (interval) =>
-  setInterval(() => {
-    for (const key in RELAY) {
-      const element = RELAY[key];
-      element.blink(500);
-    }
-  }, interval);
-
-
 let blinker = (timer, times) => {
 for (let i = 0; i <= times; i++) {
   
     setTimeout(() => {
       for (const key in RELAY) {
         const relay = RELAY[key];
-        relay.on()
+        relay.on();
       }
     }, timer * i);
     setTimeout(() => {
@@ -226,13 +211,14 @@ board.on("ready", async () => {
   const modeSwitch = new Switch("GPIO4");
   let loop;
   let fast;
+
   modeSwitch.on("open", async () => {
     clearInterval(loop)
-    fastState = true
     fast = await fastMode();
   }); 
 
   modeSwitch.on("close", async () => {
+    cancelled = true;
     clearInterval(fastMode)
     loop = setInterval( async() => {
       await normalMode();
