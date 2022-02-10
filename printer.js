@@ -6,8 +6,6 @@ import _ from 'lodash';
 import TextFormatter from './textFormatter.js';
 import ThermalPrinter from 'node-thermal-printer'
 
-
-
 let formatter = new TextFormatter();
 
 const PRINTER_NAME = 'BIXOLON_BK3_3';
@@ -67,9 +65,7 @@ export default class Printer {
 
         let formatted = formatter.addWhiteSpace(text);
         formatted = formatter.stripHTML(formatted);
-        console.log(formatted);
         formatted = formatter.apostrophe(formatted);
-        console.log(formatted);
 
         epsonThermalPrinter.append(INITIAL_PRINTER);
         epsonThermalPrinter.append(IMAGE);
@@ -95,48 +91,12 @@ export default class Printer {
         })
     }
 
-    
-    printRaw(text) {
-        let unescaped = _.unescape(text)
-
-        unescaped = formatter.addWhiteSpace(unescaped);
-
-        for (const key in CODES) {
-                const element = CODES[key];
-                
-                printDirect({
-                    data: this.prepareData(unescaped, element),
-                    printer: this.name,
-                    type: "RAW",
-                    success: function () {},
-                    error: function (err) {
-                        console.log(err);
-                    }
-                });
-            };
-        };
-
     prepareData(data, codepage) {
-
         let preparedData = Buffer.from(INITIAL_PRINTER) + Buffer.from(IMAGE) + Buffer.from(codepage) + Buffer.from(data) + Buffer.from(PAPER_CUTTING) + Buffer.from(PAPER_EJECT);
         console.log("preparedData: ", preparedData);
         return preparedData;
     }
 
-    applySpecialOptions() {
 
-    }
-
-    printFile(data) {
-            printDirect({
-                //data: Buffer.from(INITIAL_PRINTER) + Buffer.from(FRENCH_CHAR) + Buffer.from(IMAGE) + Buffer.from(data) + Buffer.from(PAPER_CUTTING) + Buffer.from(PAPER_EJECT),
-                data: data,
-                printer: this.name,
-                type: 'PDF',
-                success: function () {},
-                error: function (err) {
-                    console.error('error on printing: ' + err);
-                }
-            })
-        };
+    
     }
