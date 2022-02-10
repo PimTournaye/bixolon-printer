@@ -262,13 +262,11 @@ let relayBlink = (interval) => setInterval(() => {
 }, interval);
 
 
-
-
-board.on("ready", () => {
+board.on("ready", async () => {
   const spdt = new Switch('GPIO4');
   const led = new Led('GPIO26');
   
-  spdt.on("open", () => led.off());
-  spdt.on("close", () => led.on());
+  spdt.on("open", () => await fastMode());
+  spdt.on("close", () => await normalMode());
 });
 //main();
