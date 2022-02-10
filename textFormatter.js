@@ -7,9 +7,10 @@ export default class TextFormatter {
 
         let strippedString = text.replace(/(<([^>]+)>)/gi, "");
         let extra = strippedString.replace(/&rsquo;/g,`'`);
+        let superextra = extra.replace(/&8230;/g,`…`)
 
 
-        return extra;
+        return superextra;
     }
 
     wrap(text, lineWidth){
