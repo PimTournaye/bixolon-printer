@@ -18,7 +18,7 @@ export default class TextFormatter {
     }
 
     addWhiteSpace(text){
-        let spaced = '\n \n \n' + text + '\n \n \n';
+        let spaced = '\n' + text + '\n \n \n';
         return spaced
     }
 
