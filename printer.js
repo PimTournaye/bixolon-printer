@@ -48,8 +48,7 @@ let CODES = {
   CODE_PAGE_WPC1256_ARABIC        : Buffer.from([0x1b, 0x74, 50]),
   CODE_PAGE_WPC1257_BALTIC_RIM    : Buffer.from([0x1b, 0x74, 51]),
   CODE_FRENCH : Buffer.from([0x1b, 0x55, 11])
-}
-
+};
 
 // Will get to refactoring later once I know what I need
 export default class Printer {
@@ -97,7 +96,6 @@ export default class Printer {
     }
 
     
-
     printRaw(text) {
         let unescaped = _.unescape(text)
 

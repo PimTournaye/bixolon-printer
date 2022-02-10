@@ -269,4 +269,7 @@ board.on("ready", async () => {
   spdt.on("open", () => await fastMode());
   spdt.on("close", () => await normalMode());
 });
+
+
+
 //main();

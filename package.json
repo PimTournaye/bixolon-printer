@@ -12,10 +12,11 @@
   "dependencies": {
     "@thiagoelg/node-printer": "^0.5.7",
     "delay": "^5.0.0",
+    "johnny-five": "^2.1.0",
     "lodash": "^4.17.21",
     "node-fetch": "^3.2.0",
     "node-thermal-printer": "^4.1.2",
-    "onoff": "^6.0.3"
+    "raspi-io": "^11.0.0"
   },
   "repository": {
     "type": "git",
