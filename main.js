@@ -108,8 +108,7 @@ let normalMode = async () => {
     // Blink the relays
     //normalBlink = relayBlink(500);
 
-    blinker(NORMAL_TIMER / 4);
-    blinker(NORMAL_TIMER / 4);
+    blinker(NORMAL_TIMER / 4, 2);
     // Print the message with a bit of a delay
     setTimeout(() => {
       //currentPrinter.execute(wrappedMessage);
@@ -132,7 +131,7 @@ let normalMode = async () => {
     content = formatter.wrap(content);
 
     // Blink the relays
-    blinker(NORMAL_TIMER / 4)
+    blinker(NORMAL_TIMER / 4, 2);
     //Send to printer
     currentPrinter.execute(content);
     console.log("reached treshold");
@@ -201,19 +200,23 @@ let relayBlink = (interval) =>
   }, interval);
 
 
-let blinker = (timer) => {
-  setTimeout(() => {
-    for (const key in RELAY) {
-      const relay = RELAY[key];
-      relay.on()
-    }
-  }, timer);
-  setTimeout(() => {
-    for (const key in RELAY) {
-      const relay = RELAY[key];
-      relay.off()
-    }
-  }, timer + timer / 2);
+let blinker = (timer, times) => {
+for (let i = 0; i <= times; i++) {
+  
+    setTimeout(() => {
+      for (const key in RELAY) {
+        const relay = RELAY[key];
+        relay.on()
+      }
+    }, timer * i);
+    setTimeout(() => {
+      for (const key in RELAY) {
+        const relay = RELAY[key];
+        relay.off()
+      }
+    }, (timer + timer / 2) * i);
+  
+}
 }
 /////////////////
 /// MAIN LOOP ///
