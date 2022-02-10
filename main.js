@@ -66,7 +66,7 @@ ticketPrinters = tempPrinterArray;
 // Timer for how long it takes to print any messgae while in fastmode (in milliseconds)
 const FAST_TIMER = 10000;
 // Timer for how long it takes to check for a message while in normal mode (in milliseconds)
-const NORMAL_TIMER = 1000;
+const NORMAL_TIMER = 10000;
 
 // Init counter
 let fakeCounter = 0;
@@ -76,7 +76,7 @@ let fakeThreshold = 6;
 // Counter for the wind function (all printers at once)
 let windCounter = 0;
 // Threshold to trigger wind
-let windThreshold = 1;
+let windThreshold = 10;
 
 
 // Init to check if fastmode is interrupted
@@ -172,37 +172,38 @@ let fastMode = async () => {
   if (!cancelled) {
     console.log('commencing with fast mode');
     someMessages.forEach((data, i) => {
-      
+
       console.log(cancelled);
       setTimeout(() => {
         console.log('windCounter:', windCounter);
-        if(windCounter == windThreshold){
+        if (windCounter == windThreshold - 1) {
           console.log('starting wind');
           wind();
           windCounter = 0;
+        } else {
+          // if (cancelled == true) {
+          //   console.log('stopping ongoing fastmode');
+          //   return;
+          // };
+
+          // Get the content out of the object
+          const message = data.content.rendered;
+
+          //Get rid of HTML tags so we can cleanly print the message
+          let strippedMessage = formatter.stripHTML(message);
+          // Make sure no words get split when starting a new line
+          let wrappedMessage = formatter.wrap(strippedMessage, 48);
+          // Get a random printer
+          let currentPrinter = _.sample(ticketPrinters);
+
+          blinker(FAST_TIMER / 32, 1)
+
+          // Print the message
+          currentPrinter.execute(wrappedMessage)
+
+          console.log("ticket #", i);
+          windCounter++
         }
-        // if (cancelled == true) {
-        //   console.log('stopping ongoing fastmode');
-        //   return;
-        // };
-
-        // Get the content out of the object
-        const message = data.content.rendered;
-
-        //Get rid of HTML tags so we can cleanly print the message
-        let strippedMessage = formatter.stripHTML(message);
-        // Make sure no words get split when starting a new line
-        let wrappedMessage = formatter.wrap(strippedMessage, 48);
-        // Get a random printer
-        let currentPrinter = _.sample(ticketPrinters);
-
-        blinker(FAST_TIMER / 32, 1)
-
-        // Print the message
-        currentPrinter.execute(wrappedMessage)
-
-        console.log("ticket #", i);
-        windCounter++
       }, FAST_TIMER * i);
     })
   };
@@ -245,18 +246,18 @@ let wind = async () => {
 
   let oneMessage = _.sample(someMessages);
 
-  console.log(someMessages);
   ticketPrinters.forEach((printer) => {
-      let data = oneMessage.content.rendered
+    let data = oneMessage.content.rendered
 
-      //Get rid of HTML tags so we can cleanly print the message
-      let strippedMessage = formatter.stripHTML(data);
-      // Make sure no words get split when starting a new line
-      let wrappedMessage = formatter.wrap(strippedMessage, 48);
-      
-      printer.execute(wrappedMessage);
-      i++;
-  })};
+    //Get rid of HTML tags so we can cleanly print the message
+    let strippedMessage = formatter.stripHTML(data);
+    // Make sure no words get split when starting a new line
+    let wrappedMessage = formatter.wrap(strippedMessage, 48);
+
+    printer.execute(wrappedMessage);
+    i++;
+  })
+};
 /////////////////
 /// MAIN LOOP ///
 /////////////////
